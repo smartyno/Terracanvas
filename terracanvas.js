@@ -5,6 +5,7 @@ const svgWidth = 16;
 const svgHeight = 16;
 let selectedSVG = 1;
 let input;
+let fillInput, strokeInput, backgroundInput; // Input fields for color parameters
 
 // Define three different color palettes (fill, stroke, background)
 const colorPalettes = [
@@ -26,7 +27,7 @@ const colorPalettes = [
 ];
 
 function preload() {
-  // Load 5 SVG files from the GitHub repository
+  // Load 3 SVG files from the GitHub repository
   for (let i = 0; i < 3; i++) {
     // Replace 'username/repo' and 'path/to/svg' with your GitHub repository's information
     let githubRawURL = `https://raw.githubusercontent.com/smartyno/Terraforms/main/symbols/s${i + 1}.svg`;
@@ -41,15 +42,30 @@ function setup() {
   for (let x = 0; x < gridSize; x++) {
     grid[x] = [];
     for (let y = 0; y < gridSize; y++) {
-      grid[x][y] = floor(random(1, 3)); // Assign random numerical IDs (1 to 5)
+      grid[x][y] = floor(random(1, 4)); // Assign random numerical IDs (1 to 3)
     }
   }
 
-  // Create an input field for numeric input
+  // Create input fields for numeric input and color parameters
   input = createInput();
   input.position(10, height + 10);
-  input.attribute('placeholder', 'Enter SVG ID (1-5)');
+  input.attribute('placeholder', 'Enter SVG ID (1-3)');
   input.input(handleInput);
+
+  fillInput = createInput(colorPalettes[selectedSVG - 1].fill);
+  fillInput.position(10, height + 40);
+  fillInput.attribute('placeholder', 'Fill Color');
+  fillInput.input(updateFillColor);
+
+  strokeInput = createInput(colorPalettes[selectedSVG - 1].stroke);
+  strokeInput.position(10, height + 70);
+  strokeInput.attribute('placeholder', 'Stroke Color');
+  strokeInput.input(updateStrokeColor);
+
+  backgroundInput = createInput(colorPalettes[selectedSVG - 1].background);
+  backgroundInput.position(10, height + 100);
+  backgroundInput.attribute('placeholder', 'Background Color');
+  backgroundInput.input(updateBackgroundColor);
 }
 
 function draw() {
@@ -96,4 +112,22 @@ function handleInput() {
   } else {
     console.error("Invalid input. Enter a numeric value between 1 and 3.");
   }
+}
+
+// Update fill color based on user input
+function updateFillColor() {
+  colorPalettes[selectedSVG - 1].fill = fillInput.value();
+  redraw();
+}
+
+// Update stroke color based on user input
+function updateStrokeColor() {
+  colorPalettes[selectedSVG - 1].stroke = strokeInput.value();
+  redraw();
+}
+
+// Update background color based on user input
+function updateBackgroundColor() {
+  colorPalettes[selectedSVG - 1].background = backgroundInput.value();
+  redraw();
 }
