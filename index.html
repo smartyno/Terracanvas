@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>terracanvas</title>
+  <!-- Include the p5.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <!-- Include the p5.svg library -->
+  <script src="https://cdn.jsdelivr.net/npm/p5.svg@0.4.1/dist/p5.svg.js"></script>
+  
+
+  <style>
+    .hex1 {
+      padding: 6px; /* Add padding to create a visual box */
+      width: 65px;
+      background-color: #446D64; /* Background color for the box */
+      border: 1px solid #ddd; /* Border for the box */
+      color: white;
+      font-size: small;
+    }
+
+    .hex2 {
+      padding: 6px; /* Add padding to create a visual box */
+      width: 65px;
+      background-color: #028A6A; /* Background color for the box */
+      border: 1px solid #ddd; /* Border for the box */
+      color: white;
+      font-size: small;
+    }
+
+    .hex3 {
+      padding: 6px; /* Add padding to create a visual box */
+      width: 65px;
+      background-color: #63B100; /* Background color for the box */
+      border: 1px solid #ddd; /* Border for the box */
+      color: black;
+      font-size: small;
+    }
+
+    .hex4 {
+      padding: 6px; /* Add padding to create a visual box */
+      width: 65px;
+      background-color: #FF561D; /* Background color for the box */
+      border: 1px solid #ddd; /* Border for the box */
+      color: black;
+      font-size: small;
+    }
+    
+    .hex5 {
+      padding: 6px; /* Add padding to create a visual box */
+      width: 65px;
+      background-color: #F38300; /* Background color for the box */
+      border: 1px solid #ddd; /* Border for the box */
+      color: black;
+      font-size: small;
+    }
+
+    .hex6 {
+      padding: 6px; /* Add padding to create a visual box */
+      width: 65px;
+      background-color: #D9D9D9; /* Background color for the box */
+      border: 1px solid #ddd; /* Border for the box */
+      color: black;
+      font-size: small;
+    }
+
+    .info {
+      color: darkgray;
+      font-size: small;
+    }
+
+  </style>
+
+  
+</head>
+<body>
+  <!-- Create a container for your p5.js sketch -->
+  <div id="sketch-container"></div>
+
+<script>
+
+let svgList = [];
+let grid = [];
+const gridSize = 32;
+const svgWidth = 15;
+const svgHeight = 20;
+let selectedSVG = 1;
+let input;
+let fillInput; // Input field for fill color
+let cellColors = []; // Store fill colors for each cell
+
+// Define one color palette with a default fill color
+const colorPalette = {
+  cellFill: '#626262', // Default fill color
+};
+
+function preload() {
+  // Load SVG files from the GitHub repository
+  for (let i = 0; i < 75; i++) {
+  // Replace 'username/repo' and 'path/to/svg' with your GitHub repository's information
+    let githubRawURL = `https://raw.githubusercontent.com/smartyno/Terracanvas/main/symbols/s${i + 1}.svg`;
+    svgList[i] = loadImage(githubRawURL);
+  }
+}
+
+function setup() {
+   // Create a p5.js canvas within the sketch-container
+    let canvas = createCanvas(600, 1000);
+        canvas.parent('sketch-container'); // Set the parent of the canvas
+
+    background(50);
+  
+    createCanvas(gridSize * svgWidth, gridSize * svgHeight);
+
+  // Initialize the grid with default SVG IDs (1 to 75) and fill color
+  for (let x = 0; x < gridSize; x++) {
+    grid[x] = [];
+    cellColors[x] = [];
+    for (let y = 0; y < gridSize; y++) {
+      grid[x][y] = selectedSVG; // Default SVG ID
+      cellColors[x][y] = colorPalette.cellFill; // Default fill color
+    }
+  }
+
+  // Create input field for numeric input
+  input = createInput();
+  input.position(500, 10);
+  input.attribute('placeholder', 'Enter SVG ID (1-75)');
+  input.input(handleInput);
+
+  // Create input field for fill color
+  fillInput = createInput();
+  fillInput.position(500, 40);
+  fillInput.attribute('placeholder', 'Enter Cell Color (HEX)');
+
+  // Create a text for action
+  let action = createDiv();
+  action.position(500, 70); // Adjust the position as needed
+  action.html("<<< click on cells to apply changes");
+  action.class('info'); // Assign the CSS class 'info-box' to the element
+
+  // Create a div for Sample Color Palette (b)
+  let additionalInfo = createDiv();
+  additionalInfo.position(500, 120); // Adjust the position as needed
+  additionalInfo.html("sample palette for cell colors");
+  additionalInfo.class('info'); // Assign the CSS class 'info-box' to the element
+
+  let hex1 = createDiv();
+  hex1.position(500, 150); // Adjust the position as needed
+  hex1.html("#446D64");
+  hex1.class('hex1'); // Assign the CSS class 'info-box' to the element
+
+  let hex2 = createDiv();
+  hex2.position(500, 180); // Adjust the position as needed
+  hex2.html("#028A6A");
+  hex2.class('hex2'); // Assign the CSS class 'info-box' to the element
+
+  let hex3 = createDiv();
+  hex3.position(500, 210); // Adjust the position as needed
+  hex3.html("#63B100");
+  hex3.class('hex3'); // Assign the CSS class 'info-box' to the element
+
+  let hex4 = createDiv();
+  hex4.position(500, 240); // Adjust the position as needed
+  hex4.html("#FF561D");
+  hex4.class('hex4'); // Assign the CSS class 'info-box' to the element
+
+  let hex5 = createDiv();
+  hex5.position(500, 270); // Adjust the position as needed
+  hex5.html("#F38300");
+  hex5.class('hex5'); // Assign the CSS class 'info-box' to the element
+
+  let hex6 = createDiv();
+  hex6.position(500, 300); // Adjust the position as needed
+  hex6.html("#D9D9D9");
+  hex6.class('hex6'); // Assign the CSS class 'info-box' to the element
+
+}
+
+function draw() {
+  background(50);
+
+  // Display the grid with SVGs
+let gridY = 0; // You can change this value to control the vertical position
+ for (let x = 0; x < gridSize; x++) {
+    for (let y = 0; y < gridSize; y++) {
+        let svgID = grid[x][y];
+
+      // Apply the fill color to the SVG
+      let cellFill = cellColors[x][y];
+
+      push();
+      stroke(0, 50); // White stroke with 20% opacity
+      strokeWeight(1); // Thin stroke
+      fill(cellFill);
+      rect(x * svgWidth, y * svgHeight + gridY, svgWidth, svgHeight); // Adjust Y position
+      image(svgList[svgID - 1], x * svgWidth, y * svgHeight + gridY, svgWidth, svgHeight); // Adjust Y position
+      pop();
+    }
+  }
+}
+
+function mouseClicked() {
+  // Change SVG and fill color at the clicked coordinates
+  let x = floor(mouseX / svgWidth);
+  let y = floor(mouseY / svgHeight);
+
+  // Assign a new SVG ID to the clicked coordinate
+  grid[x][y] = selectedSVG;
+
+  // Assign a new fill color to the clicked coordinate
+  cellColors[x][y] = fillInput.value();
+
+  // Update the grid
+  redraw();
+}
+
+// Handle numeric input from the user
+function handleInput() {
+  let newValue = input.value();
+  if (!isNaN(newValue) && (newValue >= 1 && newValue <= 75)) {
+    selectedSVG = int(newValue);
+    console.log(`Selected SVG: ${selectedSVG}`);
+  } else {
+    console.error("Invalid input. Enter a numeric value between 1 and 75.");
+  }
+}
+
+  </script>
+</body>
+</html>
